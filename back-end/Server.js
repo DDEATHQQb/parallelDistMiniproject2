@@ -145,13 +145,13 @@ app.post("/room/:id", (req, res) => {
     if (error) throw error;
     if (result.length != 0) {
       console.log("Already joined");
-      res.sendStatus(200);
+      res.status(200).json({});
     } else {
       let sql = "INSERT INTO room_users(username,roomID) values (?,?);";
 
       db.query(sql, [username, roomID], (error, result) => {
         if (error) throw error;
-        res.sendStatus(201);
+        res.status(201).json({});
       });
     }
   });
@@ -170,13 +170,13 @@ app.put("/room/:id", (req, res) => {
     if (error) throw error;
     if (result.length != 0) {
       console.log("Already joined");
-      res.sendStatus(200);
+      res.status(200).json({});
     } else {
       let sql = "INSERT INTO room_users(username,roomID) values (?,?);";
 
       db.query(sql, [username, roomID], (error, result) => {
         if (error) throw error;
-        res.sendStatus(201);
+        res.status(201).json({});
       });
     }
   });
