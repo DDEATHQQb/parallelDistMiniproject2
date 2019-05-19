@@ -72,11 +72,21 @@ app.put("/cn/createRoomWithCondition",(req,res)=>{
 })
 app.delete("/cn/deleteGroup",(req,res)=>{
   let sql = "SELECT * FROM GroupChat WHERE groupID = ?";
-  db.query(sql,[req.body])
-  let sql = "DELETE FROM JoinGroup WHERE JGuserID=? and JGgroupID=?"
-  db.query(sql,[req.body.groupID],(error,result)=>{
-    
-  });
+  db.query(sql,[req.body.groupID],(result,error)=>{
+    if(error) console.log("error in line 76");
+    else if(result.length==0){
+      res.sendStatus(404);
+      console.log("Room id is not found");
+    }
+    else if(result.length==0){
+      sql = "DELETE FROM JoinGroup WHERE JGuserID=? and JGgroupID=?"
+      db.query(sql,[req.body.groupID],(error,result)=>{
+        res.sendStatus(200).send("ROOM_ID is deleted");
+      });
+     
+    }
+  })
+ 
 })
 // Old ----------------------------------------
 // call database and connect
