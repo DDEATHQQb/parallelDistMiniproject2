@@ -98,7 +98,7 @@ app.get("/room/:id", (req, res) => {
     if (result.length == 0) {
       console.log("Room does not exist");
       // res.status = 404;
-      res.send("Room does not exist");
+      res.status(404).send("Room does not exist");
       // res.sendStatus(404).send("sorry");
       return;
     } else {
@@ -111,7 +111,7 @@ app.get("/room/:id", (req, res) => {
           output.push(result[i].username);
         }
         console.log(output);
-        res.send(output);
+        res.status(200).send(output);
       });
     }
   });
@@ -171,16 +171,18 @@ app.delete("/room/:id", (req, res) => {
   res.setHeader("Content-Type", "application/json");
   let username = req.body["user"];
   let roomID = req.params.id;
-
+  console.log(username);
   const checkIfExist =
     "SELECT username FROM room_users WHERE username=? AND roomID = ? ;";
   db.query(checkIfExist, [username, roomID], (error, result) => {
     if (error) throw error;
     if (result.length == 0) {
+      console.log(username);
+      console.log(roomID);
       console.log("User not found in this room");
-      res.send("User id is not found");
-      // res.sendStatus(404).send("sorry");
+      res.status(404).send("User id is not found");
     } else {
+      console.log(username);
       console.log(roomID);
       let sql = "DELETE FROM room_users WHERE username=? AND roomID=?;";
       db.query(sql, [username, roomID], (error, result) => {
