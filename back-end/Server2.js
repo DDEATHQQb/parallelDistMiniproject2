@@ -1,22 +1,237 @@
 const express = require("express");
 const app = express();
 const path = require("path");
-const port = 8081;
-const port2 = 8082;
+const port = 8082;
+const port2 = 8080;
 
 const mysql = require("mysql");
 const moment = require("moment");
 
+var bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({ extended: false }));
+
 //const http = require('http').Server(app);
 // connect server
-const server = app.listen(port2, "0.0.0.0", () => {
-  console.log(`Listening on port: ${port2}`);
+const server = app.listen(port, () => {
+  console.log(`Listening on port: ${port}`);
 });
 
 // const server = app.listen(port, '0.0.0.0', function() {
 //     console.log(`Listening on port: ${port}`);
 // });
 const io = require("socket.io").listen(server);
+// New ----------------------------------------
+app.get("/allrooms", (req, res) => {
+  let sql = "select DISTINCT roomid from room";
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.dir(err);
+      console.log("error in server line 21");
+    } else {
+      output = [];
+      for (i = 0; i < result.length; i++) {
+        output.push(result[i].roomid);
+      }
+      console.log(output);
+      res.status(200).json(output);
+    }
+  });
+});
+app.post("/allrooms", (req, res) => {
+  const roomID = req.body.id;
+  console.log(roomID);
+  let sql = "select * from Room where roomID = ?;";
+  db.query(sql, roomID, (err, result) => {
+    if (result.length != 0) {
+      console.log("The room ID is already existed");
+      let responseString = roomID + " already exists";
+      res.status(404).json(responseString);
+    } else {
+      sql = "INSERT INTO room values(?);";
+      db.query(sql, roomID, (error, results) => {
+        if (error) {
+          console.log("error in line 52");
+        } else {
+          res.status(201).json(req.body);
+        }
+      });
+    }
+  });
+});
+app.put("/allrooms", (req, res) => {
+  const roomID = req.body.id;
+  console.log(roomID);
+  let sql = "select * from Room where roomID = ?;";
+  db.query(sql, roomID, (err, result) => {
+    if (result.length != 0) {
+      console.log("The room ID is already existed");
+      res.status(200).json(req.body);
+    } else {
+      sql = "INSERT INTO room values(?);";
+      db.query(sql, roomID, (error, results) => {
+        if (error) {
+          console.log("error in line 72");
+        } else {
+          res.status(201).json(req.body);
+        }
+      });
+    }
+  });
+});
+app.delete("/allrooms", (req, res) => {
+  const roomID = req.body.id;
+  console.log(roomID);
+  let sql = "select * from Room where roomID = ?;";
+  db.query(sql, roomID, (err, result) => {
+    if (result.length == 0) {
+      console.log("Room id is not found");
+      res.status(404).json("Room id is not found");
+    } else {
+      sql = "DELETE FROM room where roomID=?;";
+      db.query(sql, roomID, (error, results) => {
+        if (error) {
+          throw error;
+          console.log("error in line 92");
+        } else {
+          let responseString = req.body.id + " is deleted";
+          res.status(200).json(responseString);
+        }
+      });
+    }
+  });
+});
+// Old ----------------------------------------
+
+//----endpoint room ----------------------------------------------------//
+
+app.get("/room/:id", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+
+  let roomID = req.params.id;
+
+  const checkIfExist = "SELECT roomID FROM room WHERE roomID = ?;";
+  db.query(checkIfExist, roomID, (error, result) => {
+    if (error) throw error;
+    if (result.length == 0) {
+      console.log("Room does not exist");
+      res.status(404).json("Room does not exist");
+      return;
+    } else {
+      console.log(roomID);
+      let sql = "SELECT username FROM room_users WHERE roomID=?;";
+      db.query(sql, roomID, (error, result) => {
+        if (error) throw error;
+        output = [];
+        for (i = 0; i < result.length; i++) {
+          output.push(result[i].username);
+        }
+        console.log(output);
+        res.status(200).json(output);
+      });
+    }
+  });
+});
+
+app.post("/room/:id", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  // console.log("req.body = ", req.body);
+  let username = req.body["user"];
+  console.log(username + "joins the room");
+  let roomID = req.params.id;
+
+  const checkAlreadyJoined =
+    "SELECT * FROM room_users where username=? AND roomID=?";
+  db.query(checkAlreadyJoined, [username, roomID], (error, result) => {
+    if (error) throw error;
+    if (result.length != 0) {
+      console.log("Already joined");
+      res.status(200).json({});
+    } else {
+      let sql = "INSERT INTO room_users(username,roomID) values (?,?);";
+
+      db.query(sql, [username, roomID], (error, result) => {
+        if (error) throw error;
+        res.status(201).json({});
+      });
+    }
+  });
+});
+
+app.put("/room/:id", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  console.log("req.body = ", req.body);
+  let username = req.body["user"];
+  console.log(username);
+  let roomID = req.params.id;
+
+  const checkAlreadyJoined =
+    "SELECT * FROM room_users where username=? AND roomID=?";
+  db.query(checkAlreadyJoined, [username, roomID], (error, result) => {
+    if (error) throw error;
+    if (result.length != 0) {
+      console.log("Already joined");
+      res.status(200).json({});
+    } else {
+      let sql = "INSERT INTO room_users(username,roomID) values (?,?);";
+
+      db.query(sql, [username, roomID], (error, result) => {
+        if (error) throw error;
+        res.status(201).json({});
+      });
+    }
+  });
+});
+
+app.delete("/room/:id", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  let username = req.body["user"];
+  let roomID = req.params.id;
+  console.log(username + " attempted to leave " + roomID);
+  // console.log(username);
+  const checkIfExist =
+    "SELECT * FROM room_users WHERE username=? AND roomID = ? ;";
+  db.query(checkIfExist, [username, roomID], (error, result) => {
+    if (error) throw error;
+    if (result.length == 0) {
+      console.log(username);
+      console.log(roomID);
+      console.log("User not found in this room");
+      res.status(404).json("User id is not found");
+    } else {
+      console.log(username + "will be deleted from" + roomID);
+
+      let sql = "DELETE FROM room_users WHERE username=? AND roomID=?;";
+      db.query(sql, [username, roomID], (error, result) => {
+        if (error) throw error;
+        let responseString = username + " leaves the room";
+        res.status(200).json(responseString);
+      });
+    }
+  });
+});
+
+//----endpoint room ----------------------------------------------------//
+
+//------------endpoint users-----------------------------------------------//
+app.get("/users", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  let sql = "SELECT DISTINCT username from room_users";
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.dir(err);
+    } else {
+      output = [];
+      for (i = 0; i < result.length; i++) {
+        output.push(result[i].username);
+      }
+      console.log(output);
+      res.send(output);
+
+      // res.sendCode(200);
+    }
+  });
+});
+//-------------------------------------------------------------------------//
 
 // call database and connect
 const dbcalled = require("./src/dbcall");
@@ -83,9 +298,26 @@ io.on("connection", socket => {
       if (error) throw error;
       // cannot find username in database
       if (result.length == 0) {
-        socket.emit("loginFail");
+        let addUser = "INSERT INTO SystemUser(username,pass) VALUE(?,?);";
+        db.query(addUser, [data.username, data.password], (error, result) => {
+          if (error) throw error;
+
+          let getUserID =
+            "SELECT userID FROM systemUser WHERE username=? AND pass=?";
+          db.query(
+            getUserID,
+            [data.username, data.password],
+            (error, result) => {
+              if (error) throw error;
+              console.log(result[0]);
+
+              socket.emit("loginSuccess", result[0]);
+            }
+          );
+        });
       } else {
         //console.log(result[0].userID);
+        console.log(result[0]);
         socket.emit("loginSuccess", result[0]);
       }
     });
@@ -138,17 +370,18 @@ io.on("connection", socket => {
 
   //just exit a group
   socket.on("exitGroup", data => {
+    console.log("exitGroup");
     const sql =
-      "UPDATE JoinGroup SET isExit='1' and latestTimeRead=now() WHERE JGuserID=? and JGgroupID=?;";
+      "UPDATE JoinGroup SET isExit='1'WHERE JGuserID=? and JGgroupID=?;";
     db.query(sql, [data.userID, data.groupID], error => {
       if (error) throw error;
-      socket.on("exitGroupSuccess");
+      socket.emit("exitGroupSuccess");
     });
   });
   // never join group
   socket.on("joinGroup", data => {
     const sql =
-      "INSERT INTO JoinGroup(JGuserID, JGgroupID, isExit, latestTimeRead) VALUES(?,?,'0',now());";
+      "INSERT INTO JoinGroup(JGuserID, JGgroupID, isExit, latestTimeRead) VALUES(?,?,'1',now());";
     const loadMsg =
       "SELECT ChatuserID,message,timeSend FROM  Chat INNER JOIN ChatLog \
     ON ChatmessageID = messageID WHERE ChatgroupID = ?;";
