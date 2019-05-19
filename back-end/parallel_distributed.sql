@@ -45,9 +45,8 @@ create table room (
 create table room_users (
   roomID varchar(40) not null,
   username varchar(40) not null,
-  primary key (roomID, username),
-  foreign key (roomID) references Room (roomID) on
-            update cascade
+  primary key (roomID, username) --   ,foreign key (roomID) references Room (roomID) on
+  --             update cascade
 );
 insert into
   SystemUser (username, pass)
