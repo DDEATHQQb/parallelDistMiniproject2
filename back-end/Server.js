@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const path = require("path");
-const port = 8081;
+const port = 5000;
 const port2 = 8080;
 
 const mysql = require("mysql");
@@ -30,55 +30,56 @@ app.get("/allrooms", res => {
       console.dir(err);
       console.log("error in server line 21");
     } else {
-      res.send(JSON.stringify(result));
-      res.sendCode(200);
+      res.send(JSON.stringify(result)).status(200);
     }
   });
 });
-app.post("allrooms", (req, res) => {
-  let sql = "select * from GroupChat where groupID = ?;";
-  db.query(sql, [req.body.groupID], result => {
+app.post("/allrooms/:id", (req, res) => {
+  const roomID = req.params.id;
+  let sql = "select * from Room where roomID = ?;";
+  db.query(sql, roomID, result => {
     if (result.length !== 0) {
       console.log("The room ID is already existed");
-      res.sendcode(404).send("ROOM_ID already exists");
+      res.status(404).send("ROOM_ID already exists");
     } else {
       sql = "INSERT INTO GroupChat valuess(?);";
-      db.query(sql, [req.body.groupID], (error, results) => {
+      db.query(sql, roomID, (error, results) => {
         if (error) {
           console.log("error in line 41");
         } else {
-          res.sendCode(201);
-          res.send(results);
+          res.status(201).send(results);
         }
       });
     }
   });
 });
-app.put("/allrooms", (req, res) => {
-  let sql = "select distinct * from GroupChat where groupID = ?;";
-  db.query(sql, [req.body.groupID], result => {
+app.put("/allrooms/:id", (req, res) => {
+  const roomID = req.params.id;
+  let sql = "select distinct * from Room where roomID = ?;";
+  db.query(sql, roomID, result => {
     if (result.length !== 0) {
-      res.sendStatus(200).send(result.groupName);
+      res.status(200).send(result.groupName);
     } else {
-      sql = "INSERT INTO GroupChat valuess(?,?);";
-      db.query(sql, [req.body.groupID, ""], result => {
+      sql = "INSERT INTO Room valuess(?);";
+      db.query(sql, roomID, result => {
         res.send(result);
       });
     }
   });
 });
-app.delete("/allrooms", (req, res) => {
-  let sql = "SELECT * FROM GroupChat WHERE groupID = ?";
-  db.query(sql, [req.body.groupID], (result, error) => {
+app.delete("/allrooms/:id", (req, res) => {
+  const roomID = req.params.roomID;
+  let sql = "SELECT * FROM Room WHERE roomID = ?;";
+  db.query(sql,roomID, (result, error) => {
     if (error) console.log("error in line 76");
-    else if (result.length == 0) {
-      res.sendStatus(404);
+    else if (result.length == 0) { 
+      res.status(404);
       console.log("Room id is not found");
     } else if (result.length == 0) {
-      sql = "DELETE FROM JoinGroup WHERE JGuserID=? and JGgroupID=?";
-      db.query(sql, [req.body.groupID], error => {
+      sql = "DELETE FROM Room WHERE roomID=?";
+      db.query(sql,roomID, error => {
         if (error) console.log("error in line 84");
-        else res.sendStatus(200).send("ROOM_ID is deleted");
+        else res.status(200).send("ROOM_ID is deleted");
       });
     }
   });
