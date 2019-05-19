@@ -165,7 +165,7 @@ io.on("connection", socket => {
   // never join group
   socket.on("joinGroup", data => {
     const sql =
-      "INSERT INTO JoinGroup(JGuserID, JGgroupID, isExit, latestTimeRead) VALUES(?,?,'0',now());";
+      "INSERT INTO JoinGroup(JGuserID, JGgroupID, isExit, latestTimeRead) VALUES(?,?,'1',now());";
     const loadMsg =
       "SELECT ChatuserID,message,timeSend FROM  Chat INNER JOIN ChatLog \
     ON ChatmessageID = messageID WHERE ChatgroupID = ?;";
