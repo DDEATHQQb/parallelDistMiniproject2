@@ -134,9 +134,9 @@ app.get("/room/:id", (req, res) => {
 
 app.post("/room/:id", (req, res) => {
   res.setHeader("Content-Type", "application/json");
-  console.log("req.body = ", req.body);
+  // console.log("req.body = ", req.body);
   let username = req.body["user"];
-  console.log(username);
+  console.log(username + "joins the room");
   let roomID = req.params.id;
 
   const checkAlreadyJoined =
@@ -186,9 +186,10 @@ app.delete("/room/:id", (req, res) => {
   res.setHeader("Content-Type", "application/json");
   let username = req.body["user"];
   let roomID = req.params.id;
-  console.log(username);
+  console.log(username + " attempted to leave " + roomID);
+  // console.log(username);
   const checkIfExist =
-    "SELECT username FROM room_users WHERE username=? AND roomID = ? ;";
+    "SELECT * FROM room_users WHERE username=? AND roomID = ? ;";
   db.query(checkIfExist, [username, roomID], (error, result) => {
     if (error) throw error;
     if (result.length == 0) {
@@ -197,8 +198,8 @@ app.delete("/room/:id", (req, res) => {
       console.log("User not found in this room");
       res.status(404).json("User id is not found");
     } else {
-      console.log(username);
-      console.log(roomID);
+      console.log(username + "will be deleted from" + roomID);
+
       let sql = "DELETE FROM room_users WHERE username=? AND roomID=?;";
       db.query(sql, [username, roomID], (error, result) => {
         if (error) throw error;
