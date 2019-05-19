@@ -9,7 +9,7 @@ const moment = require("moment");
 
 //const http = require('http').Server(app);
 // connect server
-const server = app.listen(port, "0.0.0.0", () => {
+const server = app.listen(port, () => {
   console.log(`Listening on port: ${port}`);
 });
 
@@ -18,7 +18,7 @@ const server = app.listen(port, "0.0.0.0", () => {
 // });
 const io = require("socket.io").listen(server);
 // New ----------------------------------------
-app.get("/cn/getAllRoom",(req,res)=>{
+app.get("/allrooms",(res)=>{
   let sql = "select DISTINCT groupName from JoinGroup ,GroupChat where \
   JGgroupID = groupID ";
     db.query(sql,(err,result)=>{
@@ -34,28 +34,29 @@ app.get("/cn/getAllRoom",(req,res)=>{
     })
 }
 );
-app.post("/cn/createRoom",(req,res)=>{
+app.post("allrooms",(req,res)=>{
     let sql = "select * from GroupChat where groupID = ?;";
-    db.query(sql,[req.body.groupID],(error)=>{
+    db.query(sql,[req.body.groupID],(result)=>{
       if(result.length!==0) {
         console.log('The room ID is already existed');
-        result.sendcode(404).send("ROOM_ID already exists");
+        res.sendcode(404).send("ROOM_ID already exists");
 
       }
       else {
         sql = "INSERT INTO GroupChat valuess(?);";
-        db.query(sql,[req.body.groupID],(error,result)=>{
+        db.query(sql,[req.body.groupID],(error,results)=>{
           if(error) {
             console.log('error in line 41');
           }
           else {
-            res.sendCode(201).send(result);
+            res.sendCode(201);
+            res.send(results);
           }
         })
       }
     });
 })
-app.put("/cn/createRoomWithCondition",(req,res)=>{
+app.put("/allrooms",(req,res)=>{
   let sql = "select distinct * from GroupChat where groupID = ?;";
   db.query(sql,[req.body.groupID],(result)=>{
     if(result.length!==0){
@@ -70,7 +71,7 @@ app.put("/cn/createRoomWithCondition",(req,res)=>{
     
   });
 })
-app.delete("/cn/deleteGroup",(req,res)=>{
+app.delete("/allrooms",(req,res)=>{
   let sql = "SELECT * FROM GroupChat WHERE groupID = ?";
   db.query(sql,[req.body.groupID],(result,error)=>{
     if(error) console.log("error in line 76");
