@@ -17,7 +17,68 @@ const server = app.listen(port, "0.0.0.0", () => {
 //     console.log(`Listening on port: ${port}`);
 // });
 const io = require("socket.io").listen(server);
+// New ----------------------------------------
+app.get("/cn/getAllRoom",(req,res)=>{
+  let sql = "select DISTINCT groupName from JoinGroup ,GroupChat where \
+  JGgroupID = groupID ";
+    db.query(sql,(err,result)=>{
+      if(err) {
+        console.dir(err);
+        console.log('error in server line 21');
+      }else {
+      
+      res.send(JSON.stringify(result))
+      res.sendCode(200);
+      }
+    
+    })
+}
+);
+app.post("/cn/createRoom",(req,res)=>{
+    let sql = "select * from GroupChat where groupID = ?;";
+    db.query(sql,[req.body.groupID],(error)=>{
+      if(result.length!==0) {
+        console.log('The room ID is already existed');
+        result.sendcode(404).send("ROOM_ID already exists");
 
+      }
+      else {
+        sql = "INSERT INTO GroupChat valuess(?);";
+        db.query(sql,[req.body.groupID],(error,result)=>{
+          if(error) {
+            console.log('error in line 41');
+          }
+          else {
+            res.sendCode(201).send(result);
+          }
+        })
+      }
+    });
+})
+app.put("/cn/createRoomWithCondition",(req,res)=>{
+  let sql = "select distinct * from GroupChat where groupID = ?;";
+  db.query(sql,[req.body.groupID],(result)=>{
+    if(result.length!==0){
+      res.sendStatus(200).send(result.groupName);
+    }
+    else {
+      sql = "INSERT INTO GroupChat valuess(?,?);";
+      db.query(sql,[req.body.groupID,""],(result)=>{
+        res.send(result);
+      });
+    }
+    
+  });
+})
+app.delete("/cn/deleteGroup",(req,res)=>{
+  let sql = "SELECT * FROM GroupChat WHERE groupID = ?";
+  db.query(sql,[req.body])
+  let sql = "DELETE FROM JoinGroup WHERE JGuserID=? and JGgroupID=?"
+  db.query(sql,[req.body.groupID],(error,result)=>{
+    
+  });
+})
+// Old ----------------------------------------
 // call database and connect
 const dbcalled = require("./src/dbcall");
 const db = mysql.createConnection(dbcalled);
