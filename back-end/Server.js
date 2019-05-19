@@ -118,45 +118,22 @@ app.get("/room/test/:id", (req, res) => {
   res.send(result);
 });
 
-// app.get("/room/:id", (req, res) => {
-//   //res.setHeader("Content-Type", "application/json");
-//   let groupID = req.params.id;
-//   console.log(groupID);
-
-//   let checkIfExist = "SELECT * FROM GroupChat WHERE groupID = ?;";
-//   db.query(checkIfExist, groupID, (result, error) => {
-//     if (error) console.log("error in line 126");
-//     console.log(result);
-//     if (result.length == 0) {
-//       console.log("Room id is not found");
-//       res.sendStatus(404).send("Room does not exist");
-//     } else {
-//       sql = "SELECT username FROM JoinGroup WHERE JGgroupID=? and isExit=0";
-//       db.query(sql, groupID, error => {
-//         if (error) console.log("error in line 84");
-//         else {
-//           result = JSON.stringify(result);
-//           res.sendStatus(200).send(result);
-//         }
-//       });
-//     }
-//   });
-// });
-
+// get = enter
 // app.get("/room/:id", (req, res) => {
 //   res.setHeader("Content-Type", "application/json");
 
 //   let groupID = req.params.id;
-//   const checkIfExist = "SELECT groupID FROM GroupChat WHERE groupID = ?;";
+//   const checkIfExist = "SELECT groupID FROM GroupChat WHERE groupname = ?;";
 //   db.query(checkIfExist, groupID, (error, result) => {
 //     if (error) throw error;
 //     if (result.length == 0) {
 //       console.log("Room does not exist");
-//       res.send("Room does not exist");
+//       res.sendStatus(404).send("sorry");
+//       return;
 //     } else {
 //       console.log(groupID);
 //       let sql =
-//         "SELECT username from joinGroup jg, systemuser su WHERE JGgroupID=? AND isExit='0' AND jg.jgUserID=su.userid;";
+//         "SELECT su.username from groupchat gc,joinGroup jg, systemuser su WHERE gc.groupname=? AND JGgroupID=gc.groupID AND isExit='0' AND jg.jgUserID=su.userid;";
 //       db.query(sql, groupID, (error, result) => {
 //         if (error) throw error;
 //         // result = JSON.stringify(result);
@@ -166,30 +143,69 @@ app.get("/room/test/:id", (req, res) => {
 //         for (i = 0; i < result.length; i++) {
 //           output.push(result[i].username);
 //         }
-//         res.sendStatus(200).json(output);
+//         res.send(output);
 //       });
 //     }
 //   });
 // });
 
+//get =  join
 app.get("/room/:id", (req, res) => {
   res.setHeader("Content-Type", "application/json");
 
   let groupID = req.params.id;
-  let output = [];
-  let sql =
-    "SELECT username from joinGroup jg, systemuser su WHERE JGgroupID=? AND isExit='0' AND jg.jgUserID=su.userid;";
-  db.query(sql, groupID, (error, result) => {
-    if (error) throw error;
-    // result = JSON.stringify(result);
-    // console.log(result);
-    // console.log(result.length);
 
-    for (i = 0; i < result.length; i++) {
-      output.push(result[i].username);
+  const checkIfExist = "SELECT groupID FROM GroupChat WHERE groupname = ?;";
+  db.query(checkIfExist, groupID, (error, result) => {
+    if (error) throw error;
+    if (result.length == 0) {
+      console.log("Room does not exist");
+      // res.status = 404;
+      res.send("Room doest not exist");
+      // res.sendStatus(404).send("sorry");
+      return;
+    } else {
+      console.log(groupID);
+      let sql =
+        "SELECT su.username from groupchat gc,joinGroup jg, systemuser su WHERE gc.groupname=? AND JGgroupID=gc.groupID  AND jg.jgUserID=su.userid;";
+      db.query(sql, groupID, (error, result) => {
+        if (error) throw error;
+        output = [];
+        for (i = 0; i < result.length; i++) {
+          output.push(result[i].username);
+        }
+        console.log(output);
+        res.send(output);
+      });
     }
   });
-  res.sendStatus(200).send(output);
+});
+
+app.post("/room/:id", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  let username = req.body.USER_NAME
+  let groupID = req.params.id;
+
+  const checkAlreadyJoined = ""
+  db.query(checkAlreadyJoined, groupID, (error, result) => {
+    if (error) throw error;
+    if (result.length != 0) {
+      console.log("Already joined");
+      res.sendStatus(200)
+    } else {
+      console.log(groupID);
+      let sql ="INSERT INTO JoinGroup(JGuserID, JGgroupID, isExit, latestTimeRead) VALUES(?,?,'1',now());";
+      db.query(sql, ,groupID, (error, result) => {
+        if (error) throw error;
+        output = [];
+        for (i = 0; i < result.length; i++) {
+          output.push(result[i].username);
+        }
+        console.log(output);
+        res.send(output);
+      });
+    }
+  });
 });
 //----endpoint room ----------------------------------------------------//
 
