@@ -117,9 +117,14 @@ export class HomePage extends Component {
   };
 
   enterGroup = e => {
-    //console.log(e.groupID);
-    let groupID = e.groupID;
+    //--------------exit previous group---------------------------------------------
     let userID = localStorage.getItem("userID");
+    let groupID = this.state.groupID;
+    this.props.socket.emit("exitGroup", { userID, groupID });
+    //------------------------------------------------------------------------------
+    //console.log(e.groupID);
+    groupID = e.groupID;
+
     this.setState({
       groupID: e.groupID,
       groupName: e.groupName
@@ -140,7 +145,9 @@ export class HomePage extends Component {
     let userID = localStorage.getItem("userID");
     let groupID = this.state.groupID;
 
+    this.props.socket.emit("exitGroup", { userID, groupID });
     this.props.socket.emit("leaveGroup", { userID, groupID });
+
     this.props.socket.emit("getGroup", { userID });
     this.props.socket.emit("getOtherGroup", { userID });
     this.onExitClick();
@@ -161,6 +168,9 @@ export class HomePage extends Component {
   };
 
   onExitClick = e => {
+    let userID = this.state.userID;
+    let groupID = this.state.groupID;
+    this.props.socket.emit("exitGroup", { userID, groupID });
     this.setState({
       groupID: "-1",
       groupName: "-1"

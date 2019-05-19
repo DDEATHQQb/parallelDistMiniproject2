@@ -155,11 +155,12 @@ io.on("connection", socket => {
 
   //just exit a group
   socket.on("exitGroup", data => {
+    console.log("exitGroup");
     const sql =
-      "UPDATE JoinGroup SET isExit='1' and latestTimeRead=now() WHERE JGuserID=? and JGgroupID=?;";
+      "UPDATE JoinGroup SET isExit='1'WHERE JGuserID=? and JGgroupID=?;";
     db.query(sql, [data.userID, data.groupID], error => {
       if (error) throw error;
-      socket.on("exitGroupSuccess");
+      socket.emit("exitGroupSuccess");
     });
   });
   // never join group
