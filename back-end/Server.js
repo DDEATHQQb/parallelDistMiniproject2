@@ -80,8 +80,9 @@ app.delete("/cn/deleteGroup",(req,res)=>{
     }
     else if(result.length==0){
       sql = "DELETE FROM JoinGroup WHERE JGuserID=? and JGgroupID=?"
-      db.query(sql,[req.body.groupID],(error,result)=>{
-        res.sendStatus(200).send("ROOM_ID is deleted");
+      db.query(sql,[req.body.groupID],(error)=>{
+        if(error) console.log("error in line 84")
+        else res.sendStatus(200).send("ROOM_ID is deleted");
       });
      
     }
