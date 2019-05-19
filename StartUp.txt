@@ -1,0 +1,11 @@
+-------!! Make sure you completed the SetUpProjectEnvironment !!-------------------
+
+in front-end
+	- open cmd -> npm start
+in back-end
+	- open cmd -> nodemon server.js (or node server.js)
+	- open another cmd -> nodemon server2.js (or node server2.js)
+in loadBalancer
+	- go to loadBalancer/nginx-1.15.9
+	- open cmd -> start nginx
+	- (if you want to stop nginx) nginx -s stop
