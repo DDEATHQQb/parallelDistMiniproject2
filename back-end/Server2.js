@@ -80,7 +80,7 @@ app.put("/allrooms", (req, res) => {
 });
 app.delete("/allrooms", (req, res) => {
   const roomID = req.body.id;
-  console.log(roomID);
+  console.log("Attempted to delete " + roomID);
   let sql = "select * from Room where roomID = ?;";
   db.query(sql, roomID, (err, result) => {
     if (result.length == 0) {
@@ -93,6 +93,7 @@ app.delete("/allrooms", (req, res) => {
           throw error;
           console.log("error in line 92");
         } else {
+          console.log("deleted " + roomID);
           let responseString = req.body.id + " is deleted";
           res.status(200).json(responseString);
         }
